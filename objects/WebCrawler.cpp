@@ -5,5 +5,5 @@ WebCrawler::WebCrawler() {
 }
 
 void* WebCrawler::ThreadStartRoutine() {
-    
+
 }

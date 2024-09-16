@@ -1,5 +1,10 @@
 clean:
 	rm -rf main
 
-build:
+all: main objects
+
+main:
 	g++ main.cpp -o main
+
+objects:
+	g++ /objects/*
