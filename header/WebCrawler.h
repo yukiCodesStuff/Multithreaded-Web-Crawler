@@ -21,6 +21,7 @@ public:
 
     void LoadQueue(FILE* file);
     void Crawl(int numThreads);
+    void Run();
 
     static void* ThreadStartRoutine(void *ptr);
 };

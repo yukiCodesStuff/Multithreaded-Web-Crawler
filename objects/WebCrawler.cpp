@@ -67,10 +67,28 @@ void WebCrawler::Crawl(int numThreads) {
     }
 }
 
+void WebCrawler::Run() {
+    while (true) {
+        this->_mutex.lock();
+        if (this->_q.empty()) {
+            break;
+        }
+
+        char* curr = this->_q.front();
+        this->_q.pop();
+        this->_mutex.unlock();
+        sleep(3);
+        printf("Thread %d is now processing %s\n", pthread_self(), curr);
+    }
+}
+
 void* WebCrawler::ThreadStartRoutine(void *ptr) {
     WebCrawler* crawler = static_cast<WebCrawler*>(ptr);
-    pthread_t threadId = pthread_self(); // Get the thread ID
-    sleep(1);
-    printf("Hello World from thread %lu!\n", threadId);
+
+    // testing threads
+    // pthread_t threadId = pthread_self(); // Get the thread ID
+    // printf("Hello World from thread %lu!\n", threadId);
+
+    crawler->Run();
     return NULL;
 }
