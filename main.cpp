@@ -1,5 +1,5 @@
 #include <iostream>
-#include "header/SharedQueue.h"
+
 #include "header/WebClientUrl.h"
 #include "header/WebCrawler.h"
 
@@ -10,7 +10,20 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    
+    // store inputs
+    char* numEnd;
+    long int numThreads = strtol(argv[1], &numEnd, 10); // base 10
+    char* inputFile = argv[2];
 
+    printf("%s\n", inputFile);
+
+    FILE *f = fopen(inputFile, "r");
+
+    WebCrawler *crawler = new WebCrawler();
+    crawler->LoadQueue(f);
+
+    delete crawler;
+
+    fclose(f);
     return 0;
 }
