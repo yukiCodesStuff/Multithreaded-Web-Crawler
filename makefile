@@ -32,3 +32,6 @@ clean:
 # Test execution
 test: $(TARGET)
 	./$(TARGET) 5 ./inputFiles/1-Mil.txt
+
+testHun: $(TARGET)
+	./$(TARGET) 5 ./inputFiles/100.txt

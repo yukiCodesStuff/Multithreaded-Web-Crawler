@@ -71,13 +71,14 @@ void WebCrawler::Run() {
     while (true) {
         this->_mutex.lock();
         if (this->_q.empty()) {
+            this->_mutex.unlock();
             break;
         }
 
         char* curr = this->_q.front();
         this->_q.pop();
         this->_mutex.unlock();
-        sleep(3);
+        // sleep(3);
         printf("Thread %d is now processing %s\n", pthread_self(), curr);
     }
 }
