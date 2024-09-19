@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
 
     WebCrawler *crawler = new WebCrawler();
     crawler->LoadQueue(f);
+    crawler->Crawl(numThreads);
 
     delete crawler;
 

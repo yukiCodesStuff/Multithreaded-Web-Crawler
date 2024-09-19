@@ -1,8 +1,11 @@
+#include <unistd.h>
+
 #include "../header/WebCrawler.h"
 
 WebCrawler::WebCrawler() {}
 
 WebCrawler::~WebCrawler() {
+    delete[] this->_threads;
     delete[] this->fileBuf;
 }
 
@@ -33,8 +36,6 @@ void WebCrawler::LoadQueue(FILE* file) {
         // push URL
 		this->_q.push(start);
 
-        printf("%s\n", start);
-
         // find next URL
 		start = lineEnd + 1;
 		if (*(lineEnd - 1) == '\r') {
@@ -43,6 +44,33 @@ void WebCrawler::LoadQueue(FILE* file) {
 		*(lineEnd) = '\0';
 		lineEnd = strchr(start, '\n');
 	}
+
+    printf("Loaded %zu URLs into queue\n", this->_q.size());
 }
 
-void* WebCrawler::ThreadStartRoutine() {}
+void WebCrawler::Crawl(int numThreads) {
+
+    // initialize threads
+    this->_threads = new pthread_t[numThreads];
+    for (int i = 0; i < numThreads; ++i) {
+        if (pthread_create(this->_threads + i, NULL, &WebCrawler::ThreadStartRoutine, this) != 0) {
+            perror("Failed to create thread\n");
+            return;
+        }
+    }
+
+    // join threads
+    for (int i = 0; i < numThreads; ++i) {
+        if (pthread_join(this->_threads[i], NULL) != 0) {
+            return;
+        }
+    }
+}
+
+void* WebCrawler::ThreadStartRoutine(void *ptr) {
+    WebCrawler* crawler = static_cast<WebCrawler*>(ptr);
+    pthread_t threadId = pthread_self(); // Get the thread ID
+    sleep(1);
+    printf("Hello World from thread %lu!\n", threadId);
+    return NULL;
+}
