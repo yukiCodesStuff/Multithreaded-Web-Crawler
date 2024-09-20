@@ -1,12 +1,10 @@
-#include <unistd.h>
-
 #include "../header/WebCrawler.h"
 
 WebCrawler::WebCrawler() {}
 
 WebCrawler::~WebCrawler() {
     delete[] this->_threads;
-    delete[] this->fileBuf;
+    delete[] this->_fileBuf;
 }
 
 void WebCrawler::LoadQueue(FILE* file) {
@@ -23,13 +21,13 @@ void WebCrawler::LoadQueue(FILE* file) {
     fseek(file, 0L, SEEK_SET);
 
     // initialize buffer; make room for null terminating character
-    this->fileBuf = (char *)malloc(sz + 1);
-    fread(this->fileBuf, sz, 1, file);
-    fileBuf[sz] = '\0';
+    this->_fileBuf = (char *)malloc(sz + 1);
+    fread(this->_fileBuf, sz, 1, file);
+    _fileBuf[sz] = '\0';
 
     // populate queue
-    char* start = this->fileBuf;
-	char* lineEnd = strchr(fileBuf, '\n');
+    char* start = this->_fileBuf;
+	char* lineEnd = strchr(this->_fileBuf, '\n');
 
 	while (lineEnd != NULL) {
 
@@ -81,9 +79,37 @@ void WebCrawler::Run() {
         this->_q.pop();
         this->_mutex.unlock();
 
-        // printf("Thread %d is now processing %s\n", pthread_self(), curr);
         WebClientUrl webClientUrl(curr);
+        ProcessUrl(webClientUrl);
     }
+}
+
+void WebCrawler::ProcessUrl(WebClientUrl &webClientUrl) {
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+    hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+    hints.ai_protocol = 0;          /* Any protocol */
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
+
+    int s = getaddrinfo(webClientUrl.getHost(), NULL, &hints, &result);
+    if (s != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+        return;
+    }
+
+    printf("IP Address for %s: %s\n", webClientUrl.getHost(), result->ai_canonname);
+
+    freeaddrinfo(result);
+}
+
+int WebCrawler::DoDNSLookup(WebClientUrl &webClientUrl) {
+    // TODO
 }
 
 void* WebCrawler::ThreadStartRoutine(void *ptr) {

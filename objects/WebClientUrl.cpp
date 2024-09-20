@@ -1,12 +1,10 @@
 #include "../header/WebClientUrl.h"
 
-WebClientUrl::WebClientUrl() {
-    this->baseUrl = "";
-}
+WebClientUrl::WebClientUrl() {}
 
 WebClientUrl::WebClientUrl(char* baseUrl) : baseUrl(baseUrl) {
     PopulateAttr(baseUrl);
-    PrintUrlContents();
+    // PrintUrlContents();
 }
 
 void WebClientUrl::PopulateAttr(char* &baseUrl) {
@@ -57,7 +55,37 @@ void WebClientUrl::PopulateAttr(char* &baseUrl) {
     this->host = baseUrl;
 }
 
+// not nullable
+char* WebClientUrl::getScheme() {
+    return this->scheme;
+}
+
+char* WebClientUrl::getHost() {
+    return this->host;
+}
+
+char* WebClientUrl::getPort() {
+    if (this->port == NULL) return "80";
+    return this->port;
+}
+
+// nullable
+char* WebClientUrl::getPath() {
+    if (this->path == NULL) return "/";
+    return this->path;
+}
+
+char* WebClientUrl::getQuery(){
+    if (this->query == NULL) return "";
+    return this->query;
+}
+
+char* WebClientUrl::getFragment(){
+    if (this->fragment == NULL) return "";
+    return this->fragment;
+}
+
 void WebClientUrl::PrintUrlContents() {
-    printf("Host: %s\nScheme: %s\nPort: %s\nPath: %s\nQuery: %s\n\n", 
-    this->host, this->scheme, this->port, this->path, this->query);
+    printf("Host: %s\nScheme: %s\nPort: %s\nPath: %s\nQuery: %s\nFragment: %s\n\n", 
+    this->host, this->scheme, this->port, this->path, this->query, this->fragment);
 }

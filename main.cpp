@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     long int numThreads = strtol(argv[1], &numEnd, 10); // base 10
     char* inputFile = argv[2];
 
-    printf("%s\n", inputFile);
+    printf("Opening file %s\n", inputFile);
 
     FILE *f = fopen(inputFile, "r");
 

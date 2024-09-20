@@ -8,8 +8,11 @@ class WebClientUrl {
 private:
     char* baseUrl = NULL;
 
+    // not nullable
     char* scheme = NULL;
     char* host = NULL;
+
+    // nullable
     char* path = NULL;
     char* query = NULL;
     char* fragment = NULL;
@@ -18,6 +21,13 @@ private:
 public:
     WebClientUrl();
     WebClientUrl(char* baseUrl);
+
+    char* getScheme();
+    char* getHost();
+    char* getPath();
+    char* getQuery();
+    char* getFragment();
+    char* getPort();
 
     void PopulateAttr(char* &baseUrl);
     void PrintUrlContents();
