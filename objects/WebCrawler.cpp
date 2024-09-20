@@ -44,6 +44,7 @@ void WebCrawler::LoadQueue(FILE* file) {
 		*(lineEnd) = '\0';
 		lineEnd = strchr(start, '\n');
 	}
+    this->_q.push(start); // get last URL at EOF
 
     printf("Loaded %zu URLs into queue\n", this->_q.size());
 }
@@ -62,6 +63,7 @@ void WebCrawler::Crawl(int numThreads) {
     // join threads
     for (int i = 0; i < numThreads; ++i) {
         if (pthread_join(this->_threads[i], NULL) != 0) {
+            perror("Failed to join thread\n");
             return;
         }
     }
@@ -78,8 +80,9 @@ void WebCrawler::Run() {
         char* curr = this->_q.front();
         this->_q.pop();
         this->_mutex.unlock();
-        // sleep(3);
-        printf("Thread %d is now processing %s\n", pthread_self(), curr);
+
+        // printf("Thread %d is now processing %s\n", pthread_self(), curr);
+        WebClientUrl webClientUrl(curr);
     }
 }
 

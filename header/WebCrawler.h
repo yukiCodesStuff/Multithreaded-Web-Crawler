@@ -2,7 +2,6 @@
 
 #include <mutex>
 #include <queue>
-#include <stdio.h>
 #include <pthread.h>
 
 #include "WebClientUrl.h"

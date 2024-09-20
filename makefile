@@ -35,3 +35,6 @@ test: $(TARGET)
 
 testHun: $(TARGET)
 	./$(TARGET) 5 ./inputFiles/100.txt
+
+testUrl: $(TARGET)
+	./$(TARGET) 5 ./inputFiles/URLtest.txt
