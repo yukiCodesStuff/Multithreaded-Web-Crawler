@@ -56,31 +56,33 @@ void WebClientUrl::PopulateAttr(char* &baseUrl) {
 }
 
 // not nullable
-char* WebClientUrl::getScheme() {
+const char* WebClientUrl::getScheme() const {
     return this->scheme;
 }
 
-char* WebClientUrl::getHost() {
+const char* WebClientUrl::getHost() const {
     return this->host;
 }
 
-char* WebClientUrl::getPort() {
-    if (this->port == NULL) return "80";
+const char* WebClientUrl::getPort() const {
+    if (this->port == nullptr || std::strlen(this->port) == 0) {
+        return "80"; // Return a string literal
+    }
     return this->port;
 }
 
 // nullable
-char* WebClientUrl::getPath() {
+const char* WebClientUrl::getPath() const {
     if (this->path == NULL) return "/";
     return this->path;
 }
 
-char* WebClientUrl::getQuery(){
+const char* WebClientUrl::getQuery() const {
     if (this->query == NULL) return "";
     return this->query;
 }
 
-char* WebClientUrl::getFragment(){
+const char* WebClientUrl::getFragment() const {
     if (this->fragment == NULL) return "";
     return this->fragment;
 }

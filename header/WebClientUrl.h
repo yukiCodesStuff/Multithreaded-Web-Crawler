@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cstring>
 
 class WebClientUrl {
 private:
@@ -22,12 +23,12 @@ public:
     WebClientUrl();
     WebClientUrl(char* baseUrl);
 
-    char* getScheme();
-    char* getHost();
-    char* getPath();
-    char* getQuery();
-    char* getFragment();
-    char* getPort();
+    const char* getScheme() const;
+    const char* getHost() const;
+    const char* getPath() const;
+    const char* getQuery() const;
+    const char* getFragment() const;
+    const char* getPort() const;
 
     void PopulateAttr(char* &baseUrl);
     void PrintUrlContents();

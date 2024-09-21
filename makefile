@@ -37,4 +37,4 @@ testHun: $(TARGET)
 	./$(TARGET) 5 ./inputFiles/100.txt
 
 testUrl: $(TARGET)
-	./$(TARGET) 5 ./inputFiles/URLtest.txt
+	./$(TARGET) 1 ./inputFiles/URLtest.txt

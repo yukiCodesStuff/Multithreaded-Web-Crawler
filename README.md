@@ -12,3 +12,5 @@ Run commands in this order:
 
 ## Resources
 <a href="https://man7.org/linux/man-pages/man3/getaddrinfo.3.html">getaddrinfo() man page</a>
+<a href="https://www.geeksforgeeks.org/socket-programming-cc/">Socket Programming C</a>
+<a href="https://www.geeksforgeeks.org/snprintf-c-library/">snprintf()</a>

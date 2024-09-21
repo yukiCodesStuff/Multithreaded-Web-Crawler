@@ -1,5 +1,7 @@
 #pragma once
 
+#define IPV4_BUF_SIZE 16
+
 #include <mutex>
 #include <queue>
 #include <pthread.h>
@@ -20,6 +22,10 @@ private:
     char* _fileBuf;
 
     int DoDNSLookup(WebClientUrl &webClientUrl);
+    int DoForwardLookup(WebClientUrl &webClientUrl, struct addrinfo &hints, struct addrinfo* &result, char *ipstr);
+    int DoReverseLookup(WebClientUrl &webClientUrl);
+
+    int DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, char *ipstr);
 public:
     WebCrawler();
     ~WebCrawler();
