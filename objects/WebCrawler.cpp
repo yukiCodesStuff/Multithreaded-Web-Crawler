@@ -5,6 +5,8 @@
 
 #define ROBOTS_MAX 16384
 
+#define SOCKET_ERROR -1
+
 WebCrawler::WebCrawler() {}
 
 WebCrawler::~WebCrawler() {
@@ -90,11 +92,19 @@ void WebCrawler::Run() {
 }
 
 void WebCrawler::ProcessUrl(WebClientUrl &webClientUrl) {
-    struct addrinfo hints;
     struct addrinfo *result;
     char *ipstr = new char[IPV4_BUF_SIZE];
-    WebCrawler::DoForwardLookup(webClientUrl, hints, result, ipstr);
-    WebCrawler::DoConnect(webClientUrl, result, ipstr);
+    WebCrawler::DoForwardLookup(webClientUrl, result, ipstr);
+
+    bool connect = false;
+    this->_mutex.lock();
+    if (this->_seenIPs.find(ipstr) == this->_seenIPs.end()) {
+        connect = true;
+        this->_seenIPs.insert(ipstr);
+    }
+    this->_mutex.unlock();
+
+    if (connect) WebCrawler::DoConnect(webClientUrl, result, ipstr);
 
     delete[] ipstr;
     freeaddrinfo(result);
@@ -104,7 +114,8 @@ int WebCrawler::DoDNSLookup(WebClientUrl &webClientUrl) {
     // TODO
 }
 
-int WebCrawler::DoForwardLookup(WebClientUrl &webClientUrl, struct addrinfo &hints, struct addrinfo* &result, char *ipstr) {
+int WebCrawler::DoForwardLookup(WebClientUrl &webClientUrl, struct addrinfo* &result, char *ipstr) {
+    struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;    /* Allow only IPv4 */
     hints.ai_socktype = SOCK_STREAM; /* Stream socket */
@@ -150,8 +161,6 @@ int WebCrawler::DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, 
         return -1;
     }
 
-    printf("Checkpoint 1\n");
-
     int status;
     if ((status = connect(clientfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0) {
         perror("Failed connection");
@@ -159,8 +168,6 @@ int WebCrawler::DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, 
         close(clientfd);
         return -1;
     }
-
-    printf("Checkpoint 2\n");
 
     char sendBuf[BUFSIZ];
     snprintf(sendBuf, BUFSIZ,
@@ -170,7 +177,10 @@ int WebCrawler::DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, 
              "Connection: close\r\n\r\n",
              webClientUrl.getHost());
 
-	send(clientfd, sendBuf, strlen(sendBuf), 0);
+	if (send(clientfd, sendBuf, strlen(sendBuf), 0) == SOCKET_ERROR) {
+        perror("Send error\n");
+        return -1;
+    }
 
     printf("Sent %s\n", sendBuf);
 
@@ -178,31 +188,54 @@ int WebCrawler::DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, 
 	int ret, currPos = 0, bufSize = INITIAL_BUF_SIZE;
 	char* recvBuf = (char*)malloc(INITIAL_BUF_SIZE);
 
+    // timeout timeval
+	struct timeval tv;
+	tv.tv_sec = 10;
+	tv.tv_usec = 0;
+
+	fd_set curr_sockets, ready_sockets;
+	FD_ZERO(&curr_sockets);
+	FD_SET(clientfd, &curr_sockets);
 	while (true) {
-        int bytes = recv(clientfd, recvBuf + currPos, bufSize - currPos, 0);
-        if (bytes == 0) { // nothing left to read
-            break;
-        } else if (bytes < 0) { // error occurred
-            perror("Error occurred while receiving");
-            free(recvBuf);
-            close(clientfd);
-            return -1;
-        }
 
-        currPos += bytes;
-
-        // Check if we need to resize the buffer
-        if (currPos >= bufSize - THRESHOLD) {
-            bufSize += THRESHOLD;
-            char* newBuf = (char*)realloc(recvBuf, bufSize);
-            if (newBuf == NULL) {
-                perror("Buffer reallocation failed");
+        ready_sockets = curr_sockets;
+        if ((ret = select(FD_SETSIZE, &ready_sockets, NULL, NULL, &tv)) > 0) {
+            int bytes = recv(clientfd, recvBuf + currPos, bufSize - currPos, 0);
+            if (bytes == 0) { // nothing left to read
+                break;
+            } else if (bytes < 0) { // error occurred
+                perror("Error occurred while receiving\n");
+                free(recvBuf);
+                close(clientfd);
+                return -1;
+            } else if (currPos > ROBOTS_MAX) {
+                perror("Error occurred while receiving\n");
                 free(recvBuf);
                 close(clientfd);
                 return -1;
             }
-            recvBuf = newBuf;
-        }
+
+            currPos += bytes;
+
+            // Check if we need to resize the buffer
+            if (currPos >= bufSize - THRESHOLD) {
+                bufSize += THRESHOLD;
+                char* newBuf = (char*)realloc(recvBuf, bufSize);
+                if (newBuf == NULL) {
+                    perror("Buffer reallocation failed\n");
+                    free(recvBuf);
+                    close(clientfd);
+                    return -1;
+                }
+                recvBuf = newBuf;
+            }
+        } else if (ret == -1) {
+			free(recvBuf);
+			return -1;
+		} else {
+			free(recvBuf);
+			return -1;
+		}
     }
 
     recvBuf[currPos] = '\0';

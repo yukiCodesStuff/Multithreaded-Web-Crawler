@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <set>
 
 #include "WebClientUrl.h"
 
@@ -17,12 +18,13 @@ class WebCrawler {
 private:
     std::mutex _mutex;
     std::queue<char*> _q; // stores char* URLs; converts after
+    std::set<char*> _seenIPs;
     pthread_t* _threads;
 
     char* _fileBuf;
 
     int DoDNSLookup(WebClientUrl &webClientUrl);
-    int DoForwardLookup(WebClientUrl &webClientUrl, struct addrinfo &hints, struct addrinfo* &result, char *ipstr);
+    int DoForwardLookup(WebClientUrl &webClientUrl, struct addrinfo* &result, char *ipstr);
     int DoReverseLookup(WebClientUrl &webClientUrl);
 
     int DoConnect(WebClientUrl &webClientUrl, struct addrinfo* &result, char *ipstr);
