@@ -11,6 +11,6 @@ Run commands in this order:
    This simply runs the test file in the ```inputFiles``` directory which has 1,000,000 links in it
 
 ## Resources
-<a href="https://man7.org/linux/man-pages/man3/getaddrinfo.3.html">getaddrinfo() man page</a>
-<a href="https://www.geeksforgeeks.org/socket-programming-cc/">Socket Programming C</a>
-<a href="https://www.geeksforgeeks.org/snprintf-c-library/">snprintf()</a>
+<a href="https://man7.org/linux/man-pages/man3/getaddrinfo.3.html">getaddrinfo() man page</a><br />
+<a href="https://www.geeksforgeeks.org/socket-programming-cc/">Socket Programming C</a><br />
+<a href="https://www.geeksforgeeks.org/snprintf-c-library/">snprintf()</a><br />
